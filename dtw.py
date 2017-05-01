@@ -1,5 +1,5 @@
 from math import *
-from scipy.otimize import basinhopping
+from scipy.optimize import basinhopping
 import sys
 import time
 
@@ -53,10 +53,10 @@ for line in f:
     data_test.append(floats)
 f.close()
 
-weight1 = 1
-weight2 = 1
-weight3 = 1
-def DTWDistance(s1, s2, w):
+# weight1 = 1
+# weight2 = 1
+# weight3 = 1
+def DTWDistance(s1, s2, w, weight1, weight2, weight3):
     DTW={}
     w = max(w, abs(len(s1)-len(s2)))
     for i in range(-1, len(s1)):
@@ -82,14 +82,17 @@ def LB_Keogh(C, idx):
         elif C[i] < train_lower_b[idx][i]:
             sum_weight += (C[i] - train_lower_b[idx][i]) ** 2
     return sum_weight
-        
+'''
 for idx,d_test in enumerate(data_test):
     min_dist = float('inf')
     the_label = 0
     for idx2, d_train in enumerate(data_train):
         LB_dist = LB_Keogh(d_test[1:], idx2)
         if LB_dist < min_dist:
-            distance = DTWDistance(d_test[1:],d_train[1:],window_size)
+            weight1 = 1
+            weight2 = 1
+            weight3 = 1
+            distance = DTWDistance(d_test[1:],d_train[1:],window_size,weight1,weight2,weight3)
             if distance < min_dist:
                 min_dist = distance
                 the_label = d_train[0]
@@ -98,5 +101,39 @@ for idx,d_test in enumerate(data_test):
     end = time.time()
     print("index:{}, time:{}".format(idx, end - start))
 print(correct_predictions/len(data_test))
+'''
+def func3d(x):
+    correct_predictions = 0
+    for idx,d_test in enumerate(data_test):
+        min_dist = float('inf')
+        the_label = 0
+        for idx2, d_train in enumerate(data_train):
+            LB_dist = LB_Keogh(d_test[1:], idx2)
+            if LB_dist < min_dist:
+                distance = DTWDistance(d_test[1:],d_train[1:],window_size,x[0],x[1],x[2])
+                if distance < min_dist:
+                    min_dist = distance
+                    the_label = d_train[0]
+        if the_label == d_test[0]:
+            correct_predictions += 1
+        end = time.time()
+        # print("index:{}, time:{}".format(idx, end - start))
+    # print(correct_predictions/len(data_test))
+    return -1*correct_predictions/len(data_test)
 
-func = lambda seq: LB_Keogh(seq,0)
+
+
+x0 = [1.0, 1.0, 1.0]
+# the bounds
+xmin = [0., 0., 0.]
+xmax = [3., 3., 3.]
+
+# rewrite the bounds in the way required by L-BFGS-B
+bounds = [(low, high) for low, high in zip(xmin, xmax)]
+minimizer_kwargs = {"method": "L-BFGS-B", "bounds":bounds}
+print('start basinhopping')
+ret = basinhopping(func3d, x0, minimizer_kwargs=minimizer_kwargs, niter=100)
+print("global minimum: x = [%.4f, %.4f, %.4f], f(x0) = %.4f" % (ret.x[0],ret.x[1],ret.x[2],ret.fun))
+print('done')
+end = time.time()
+print(end - start)
