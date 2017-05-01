@@ -35,9 +35,10 @@ def DTWDistance(s1, s2, w):
 correct_predictions = 0
 
 for idx,d_test in enumerate(data_test):
-    min_dist = inf
+    min_dist = float('inf')
     the_label = 0
     for d_train in data_train:
+        #LB_dist = LB_Keogh()
         distance = DTWDistance(d_test[1:],d_train[1:],10)
         if distance < min_dist:
             min_dist = distance
