@@ -18,6 +18,9 @@ for line in f:
     data_test.append(floats)
 f.close()
 
+weight1 = 1
+weight2 = 1
+weight3 = 1
 def DTWDistance(s1, s2, w):
     DTW={}
     w = max(w, abs(len(s1)-len(s2)))
@@ -29,7 +32,9 @@ def DTWDistance(s1, s2, w):
         for j in range(max(0, i-w), min(len(s2), i+w)):
             dist= (s1[i]-s2[j])**2
             # DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
-            DTW[(i, j)] = min(DTW[(i-1, j)] + dist ,DTW[(i, j-1)] + dist, DTW[(i-1, j-1)] + 2*dist)
+            DTW[(i, j)] = min(DTW[(i-1, j-1)] + weight1 * dist,
+                            DTW[(i-1, j)] + weight2 * dist,
+                            DTW[(i, j-1)] + weight3 * dist)
     return sqrt(DTW[len(s1)-1, len(s2)-1])
 
 correct_predictions = 0
