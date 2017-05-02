@@ -135,7 +135,7 @@ def DTWCostMatrix(s1, s2, w):
 
 def genVectorBase(value, base_v):
     vec = []
-    while(base_v < value):
+    while(value > 0):
         current_value = value % base_v
         vec.append(current_value)
         value = value // base_v
@@ -243,7 +243,8 @@ memPath=[]
 # print(len(new_serie))
 # plt.plot(new_serie)
 # plt.show()
-
+print(genVectorBase(14237,100))
+# print('Hello')
 # scaled = uniScaling(new_serie,400)
 # plt.plot(scaled)
 # plt.show();
