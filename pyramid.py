@@ -40,6 +40,17 @@ def pyramid(serie):
         print(len(out)) 
         return pyramid(out)
 
+def pisa(serie,iteration):
+    out=[]
+    serie.append(serie[0])
+    iteration-=1
+    for idx,value in enumerate(serie):
+        if idx==len(serie)-1: break
+        else : out.append(average_ts(value,serie[idx+1]))
+    if iteration==0: return out
+    else: return pisa(out,iteration)
+
+
 class_a = []
 counting = 0
 first_label = data_train[0][0]
@@ -54,6 +65,8 @@ for d in data_train:
 memPath=[]
 # avgSerie = average_ts(class_a[2],class_a[1])
 print("class_a size: {}".format(len(class_a)))
-result = pyramid(class_a)
+# result = pyramid(class_a)
+result = pisa(class_a,10)
+result = pyramid(result)
 plt.plot(result[0])
 plt.show()
