@@ -42,13 +42,21 @@ def pyramid(serie):
 
 def pisa(serie,iteration):
     out=[]
-    serie.append(serie[0])
+    if iteration%2==0: serie.append(serie[0])
+    else:
+        serie = [serie[len(serie)-1]] + serie
     iteration-=1
     for idx,value in enumerate(serie):
         if idx==len(serie)-1: break
         else : out.append(average_ts(value,serie[idx+1]))
     if iteration==0: return out
-    else: return pisa(out,iteration)
+    else:
+        # for r in out:
+        #     plt.plot(r)
+        # plt.show()
+
+        return pisa(list(out),iteration)
+
 
 
 class_a = []
@@ -60,13 +68,31 @@ for d in data_train:
         # plt.plot(d[1:])
         counting += 1
 
+first = class_a[1]
+second = class_a[2]
+result = average_ts(first,second)
+for i in range(50):
+    print(i)
+    result =average_ts(result, second)
+
+plt.plot(first)
+plt.plot(second)
+plt.plot(result,'red')
+plt.show()
+sys.exit(0)
+
         
 
 memPath=[]
 # avgSerie = average_ts(class_a[2],class_a[1])
 print("class_a size: {}".format(len(class_a)))
+# l1 = range(0,10)
+# l2 = range(0,10)
+# print(xxx)
 # result = pyramid(class_a)
-result = pisa(class_a,10)
-result = pyramid(result)
-plt.plot(result[0])
+result = pisa(class_a,20)
+# result = pyramid(result)
+# plt.plot(result[0])
+for r in result:
+    plt.plot(r)
 plt.show()
