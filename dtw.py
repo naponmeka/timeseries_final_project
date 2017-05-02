@@ -40,7 +40,7 @@ window_size = 10
 r = 5
 
 for line in f:
-    floats = [float(x) for x in line.strip().split(' ')]
+    floats = [float(x) for x in line.strip().split()]
     data_train.append(floats)
     train_upper_b.append(upper_keogh(floats[1:]))
     train_lower_b.append(lower_keogh(floats[1:]))
@@ -49,7 +49,7 @@ f.close()
 data_test = []
 f = open('ClassificationClusteringDatasets/' + test_filename)
 for line in f:
-    floats = [float(x) for x in line.strip().split(' ')]
+    floats = [float(x) for x in line.strip().split()]
     data_test.append(floats)
 f.close()
 
