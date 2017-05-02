@@ -246,7 +246,7 @@ def average_n_ts(series):
     costMap,path = DTWCostNDimMatrix(series)
     global memPath2
     memPath2=[]
-    last_index = genVectorBase(len(series[0]) ** len(series) - 1, len(series[0])))
+    last_index = genVectorBase(len(series[0]) ** len(series) - 1, len(series[0]))
     CalNDimPath(path,path[last_index])
     unScaledSeries = getSeriefromPathNDim(memPath2, series)
     avgSerie = uniScaling(unScaledSeries, len(_s1))
