@@ -1,8 +1,8 @@
 from math import *
-from scipy.optimize import basinhopping
+# from scipy.optimize import basinhopping
 import sys
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def upper_keogh(seq):
     upper_seq = []
@@ -180,6 +180,16 @@ def CalPath(path, next):
     memPath = [next] + memPath
     CalPath(path, path[(next)])
 
+def CalNDimPath(path, next):
+    # if next[0] < 0 or next[1] < 0 : return
+    for i in next:
+        if i < 0:
+            return
+    # print(next)
+    global memPath
+    memPath = [next] + memPath
+    CalPath(path, path[(next)])
+
 def uniScaling(s1,to_len):
     current_len = len(s1)
     ratio = current_len/to_len  
@@ -203,6 +213,16 @@ def getSeriefromPath(_memPath,_s1,_s2):
         new_serie.append((_s1[point[0]] + _s2[point[1]])*0.5)
     return new_serie
 
+def getSeriefromPathNDim(_memPath,series):
+    new_serie= []
+    for mapped_points in _memPath:
+        sum_value = 0
+        for idx,point in enumerate(mapped_points):
+            sum_value += series[idx][point]
+        new_serie.append(sum_value / len(series))
+        #new_serie.append((_s1[point[0]] + _s2[point[1]])*0.5)
+    return new_serie
+
 def average_ts(_s1, _s2):
     _s2 = uniScaling(_s2,len(_s1))
     costMap,path = DTWCostMatrix(_s1, _s2,10)
@@ -214,7 +234,17 @@ def average_ts(_s1, _s2):
     avgSerie = uniScaling(unScaledSeries,len(_s1))
     return avgSerie
 
-
+def average_n_ts(series):
+    for i in range(1, len(seires)):
+        series[i] = uniScaling(series[i],len(series[0]))
+    costMap,path = DTWCostNDimMatrix(series)
+    global memPath2
+    memPath2=[]
+    last_index = genVectorBase(len(series[0]) ** len(series) - 1, len(series[0])))
+    CalNDimPath(path,path[last_index])
+    unScaledSeries = getSeriefromPathNDim(memPath2, series)
+    avgSerie = uniScaling(unScaledSeries, len(_s1))
+    return avgSerie
 #
 # x,path = DTWCostMatrix(class_a[0],class_a[1],10)
 
@@ -236,6 +266,7 @@ def average_ts(_s1, _s2):
 # # plt.plot(MatrixP)
 # plt.show()
 memPath=[]
+memPath2=[]
 # CalPath(path, path[(469,469)])
 # new_serie= []
 # for point in memPath:
