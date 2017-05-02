@@ -1,4 +1,4 @@
-from dtwNoob import * 
+from averageSeries import * 
 from math import *
 from scipy.optimize import basinhopping
 import sys
