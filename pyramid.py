@@ -30,6 +30,16 @@ for line in f:
     data_test.append(floats)
 f.close()
 
+def pyramid(serie):
+    out=[]
+    for idx,value in enumerate(serie):
+        if idx==len(serie)-1: break
+        else : out.append(average_ts(value,serie[idx+1]))
+    if len(out)==1: return out
+    else :
+        print(len(out)) 
+        return pyramid(out)
+
 class_a = []
 counting = 0
 first_label = data_train[0][0]
@@ -38,7 +48,12 @@ for d in data_train:
         class_a.append(d[1:])
         # plt.plot(d[1:])
         counting += 1
+
+        
+
 memPath=[]
-avgSerie = average_ts(class_a[2],class_a[1])
-plt.plot(avgSerie)
+# avgSerie = average_ts(class_a[2],class_a[1])
+print("class_a size: {}".format(len(class_a)))
+result = pyramid(class_a)
+plt.plot(result[0])
 plt.show()
