@@ -136,7 +136,7 @@ def DTWCostMatrix(s1, s2, w):
 
 def genVectorBase(value, base_v):
     vec = []
-    while(base_v < value):
+    while(value > 0):
         current_value = value % base_v
         vec.append(current_value)
         value = value // base_v
@@ -162,11 +162,17 @@ def DTWCostNDimMatrix(seqs):
             for j in range(i+1,nDim):
                 dist += (seqs[i][index[i]] - seqs[j][index[j]]) ** 2
         min_value = float('inf')
+        min_path = [0]*nDim
         for i in range(1, 2 ** nDim):
             neg_vec = genVectorBase(i, 2)
             new_vec = index.clone()
             for j in range(len(neg_vec)):
-                min_value = min()
+                new_vec[j] -= neg_vec[j]
+            if min_value > DTW[new_vec]:
+                 min_value = DTW[new_vec]
+                 min_path = new_vec
+        path[index] = min_path
+    return DTW, path
 
 def CalPath(path, next):
     if next[0] < 0 or next[1] < 0: return 
@@ -243,7 +249,8 @@ memPath=[]
 # print(len(new_serie))
 # plt.plot(new_serie)
 # plt.show()
-
+print(genVectorBase(14237,100))
+# print('Hello')
 # scaled = uniScaling(new_serie,400)
 # plt.plot(scaled)
 # plt.show();
