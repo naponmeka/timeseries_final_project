@@ -133,6 +133,40 @@ def DTWCostMatrix(s1, s2, w):
     # return sqrt(DTW[len(s1)-1, len(s2)-1])
     return DTW,path
 
+def genVectorBase(value, base_v):
+    vec = []
+    while(base_v < value):
+        current_value = value % base_v
+        vec.append(current_value)
+        value = value // base_v
+    return vec
+
+def DTWCostNDimMatrix(seqs):
+    nDim = len(seqs)
+    DTW = {}
+    path = {}
+    for i in range((len(seqs[0])+2) ** nDim):
+        n_vec = genVectorBase(i, len(seqs[0])+2)
+        for j in range(len(n_vec)):
+            n_vec[j] -= 2
+        DTW[n_vec] = float('inf')
+    n_vec = genVectorBase(0, len(seqs[0])+2)
+    for j in range(len(n_vec)):
+        n_vec[j] -= 1
+    DTW[n_vec] = 0
+    for item in range((len(seqs[0])) ** nDim):
+        index = genVectorBase(item, len(seqs[0]))
+        dist = 0
+        for i in range(nDim):
+            for j in range(i+1,nDim):
+                dist += (seqs[i][index[i]] - seqs[j][index[j]) ** 2
+        min_value = float('inf')
+        for i in range(1, 2 ** nDim):
+            neg_vec = genVectorBase(i, 2)
+            new_vec = index.clone()
+            for j in range(len(neg_vec)):
+                min_value = min()
+
 def CalPath(path, next):
     if next[0] < 0 or next[1] < 0 : return 
     # print(next)
