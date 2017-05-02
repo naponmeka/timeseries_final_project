@@ -159,13 +159,19 @@ def DTWCostNDimMatrix(seqs):
         dist = 0
         for i in range(nDim):
             for j in range(i+1,nDim):
-                dist += (seqs[i][index[i]] - seqs[j][index[j]) ** 2
+                dist += (seqs[i][index[i]] - seqs[j][index[j]]) ** 2
         min_value = float('inf')
+        min_path = [0]*nDim
         for i in range(1, 2 ** nDim):
             neg_vec = genVectorBase(i, 2)
             new_vec = index.clone()
             for j in range(len(neg_vec)):
-                min_value = min()
+                new_vec[j] -= neg_vec[j]
+            if min_value > DTW[new_vec]:
+                 min_value = DTW[new_vec]
+                 min_path = new_vec
+        path[index] = min_path
+    return DTW, path
 
 def CalPath(path, next):
     if next[0] < 0 or next[1] < 0 : return 
