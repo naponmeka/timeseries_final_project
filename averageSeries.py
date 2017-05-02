@@ -37,7 +37,7 @@ def lower_keogh(seq):
 # data_train = []
 # train_lower_b = []
 # train_upper_b = []
-window_size = 10
+window_size = 6000
 r = 5
 
 # for line in f:
@@ -96,7 +96,7 @@ print(correct_predictions/len(data_test))
 #         out.append()
 
 
-def DTWDistance(s1, s2, w, weight1, weight2, weight3):
+def DTWDistance(s1, s2, w):
     DTW={}
     w = max(w, abs(len(s1)-len(s2)))
     for i in range(-2, len(s1)):
@@ -107,9 +107,9 @@ def DTWDistance(s1, s2, w, weight1, weight2, weight3):
         for j in range(max(0, i-w), min(len(s2), i+w)):
             dist = (s1[i]-s2[j])**2
             # DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
-            DTW[(i, j)] = min(DTW[(i-1, j-1)] + weight1 * dist,
-                            DTW[(i-1, j)] + weight2 * dist,
-                            DTW[(i, j-1)] + weight3 * dist)
+            DTW[(i, j)] = min(DTW[(i-1, j-1)] + dist,
+                            DTW[(i-1, j)] +  dist,
+                            DTW[(i, j-1)] +  dist)
     return sqrt(DTW[len(s1)-1, len(s2)-1])
 
 
@@ -126,10 +126,11 @@ def DTWCostMatrix(s1, s2, w):
             dist = (s1[i]-s2[j])**2
             minVar = min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
             DTW[(i, j)] = dist + minVar
-            if minVar == DTW[(i-1, j)]: path[(i,j)] = (i-1,j)
+            if minVar == DTW[(i-1, j-1)]: path[(i,j)] = (i-1,j-1)
+            elif minVar == DTW[(i-1, j)]: path[(i,j)] = (i-1,j)
             elif minVar == DTW[(i, j-1)]: path[(i,j)] = (i,j-1)
-            else : path[(i,j)] = (i-1,j-1)
             
+
     # return sqrt(DTW[len(s1)-1, len(s2)-1])
     return DTW,path
 
@@ -159,7 +160,7 @@ def DTWCostNDimMatrix(seqs):
         dist = 0
         for i in range(nDim):
             for j in range(i+1,nDim):
-                dist += (seqs[i][index[i]] - seqs[j][index[j]) ** 2
+                dist += (seqs[i][index[i]] - seqs[j][index[j]]) ** 2
         min_value = float('inf')
         for i in range(1, 2 ** nDim):
             neg_vec = genVectorBase(i, 2)
@@ -168,21 +169,26 @@ def DTWCostNDimMatrix(seqs):
                 min_value = min()
 
 def CalPath(path, next):
-    if next[0] < 0 or next[1] < 0 : return 
+    if next[0] < 0 or next[1] < 0: return 
     # print(next)
     global memPath
     memPath = [next] + memPath
     CalPath(path, path[(next)])
 
 def uniScaling(s1,to_len):
+    # print("uniscale")
+    # print(len(s1))
+    # print(to_len)
     current_len = len(s1)
     ratio = current_len/to_len  
     result=[]
     for i in range(1,to_len+1):
-        # print(i)
-        # print(ceil(i*(ratio)))
-        result.append( s1[ceil(i*(ratio))-1] )
-        
+        goingToAccess = ceil(i*(ratio))-1
+        if goingToAccess < len(s1):
+            # print("goingto: {}".format(goingToAccess))
+            result.append( s1[goingToAccess] )
+        else:
+            result.append( s1[goingToAccess - 1] )
     return result
 
 def toMatrix(input,_mSize):
@@ -194,16 +200,16 @@ def toMatrix(input,_mSize):
 def getSeriefromPath(_memPath,_s1,_s2):
     new_serie= []
     for point in _memPath:
-        new_serie.append((_s1[point[0]] + _s2[point[1]])*0.5)
+        new_serie.append((_s1[point[0]] + _s2[point[1]])/2)
     return new_serie
 
 def average_ts(_s1, _s2):
     _s2 = uniScaling(_s2,len(_s1))
-    costMap,path = DTWCostMatrix(_s1, _s2,10)
+    costMap,path = DTWCostMatrix(_s1, _s2,window_size)
     costMatrix = toMatrix(costMap,len(_s1))
     global memPath
     memPath=[]
-    CalPath(path,path[(len(_s1)-1,len(_s1)-1)])
+    CalPath(path,(len(_s1)-1,len(_s1)-1))
     unScaledSeries = getSeriefromPath(memPath,_s1,_s2)
     avgSerie = uniScaling(unScaledSeries,len(_s1))
     return avgSerie
