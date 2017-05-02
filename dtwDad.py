@@ -84,7 +84,7 @@ def DTWCostMatrix(s1, s2, w):
     for i in range(len(s1)):
         for j in range(max(0, i-w), min(len(s2), i+w)):
             dist = (s1[i]-s2[j])**2
-            # DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
+            DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
     # return sqrt(DTW[len(s1)-1, len(s2)-1])
     return DTW
 
@@ -175,15 +175,16 @@ first_label = data_train[0][0]
 for d in data_train:
     if first_label == d[0]:
         class_a.append(d[1:])
-        plt.plot(d[1:])
+        # plt.plot(d[1:])
         counting += 1
 # print(class_a)
-plt.show()
+# plt.show()
 mean = dba(class_a, 1)
 # print(mean)
 # print(counting)
 plt.plot(mean)
-
-plt.ylabel('some numbers')
+# x = DTWCostMatrix(class_a[0],class_a[1],10)
+# print(x)
+# plt.ylabel('some numbers')
 plt.show()
 # data_train = []
