@@ -71,12 +71,13 @@ for d in data_train:
 first = class_a[1]
 second = class_a[2]
 result = average_ts(first,second)
-for i in range(50):
-    print(i)
-    result =average_ts(result, second)
+result = average_ts(result,second)
+result2 = average_n_ts([first,second,second])
 
 plt.plot(first)
 plt.plot(second)
+
+plt.plot(result2,'blue')
 plt.plot(result,'red')
 plt.show()
 sys.exit(0)

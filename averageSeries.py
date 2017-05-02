@@ -1,8 +1,8 @@
 from math import *
-from scipy.optimize import basinhopping
+# from scipy.optimize import basinhopping
 import sys
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def upper_keogh(seq):
     upper_seq = []
@@ -134,12 +134,14 @@ def DTWCostMatrix(s1, s2, w):
     # return sqrt(DTW[len(s1)-1, len(s2)-1])
     return DTW,path
 
-def genVectorBase(value, base_v):
+def genVectorBase(value, base_v, size):
     vec = []
     while(value > 0):
         current_value = value % base_v
         vec.append(current_value)
         value = value // base_v
+    while(len(vec)<size):
+        vec.append(0)
     return vec
 
 def DTWCostNDimMatrix(seqs):
@@ -147,32 +149,45 @@ def DTWCostNDimMatrix(seqs):
     DTW = {}
     path = {}
     for i in range((len(seqs[0])+2) ** nDim):
-        n_vec = genVectorBase(i, len(seqs[0])+2)
+        n_vec = genVectorBase(i, len(seqs[0])+2 , nDim)
         for j in range(len(n_vec)):
             n_vec[j] -= 2
-        DTW[n_vec] = float('inf')
-    n_vec = genVectorBase(0, len(seqs[0])+2)
+        DTW[hashList(n_vec,len(seqs[0]))] = float('inf')
+    n_vec = genVectorBase(0, len(seqs[0])+2 , nDim)
     for j in range(len(n_vec)):
         n_vec[j] -= 1
-    DTW[n_vec] = 0
+    DTW[hashList(n_vec,len(seqs[0]))] = 0
     for item in range((len(seqs[0])) ** nDim):
-        index = genVectorBase(item, len(seqs[0]))
+        index = genVectorBase(item, len(seqs[0]),nDim)
+        # print("index :")
+        # # print(index)
         dist = 0
         for i in range(nDim):
             for j in range(i+1,nDim):
+                # print(index)
+                # print("seqs {} len :{} -- index : {}".format(i,len(seqs[i], index[i])))
                 dist += (seqs[i][index[i]] - seqs[j][index[j]]) ** 2
         min_value = float('inf')
         min_path = [0]*nDim
         for i in range(1, 2 ** nDim):
-            neg_vec = genVectorBase(i, 2)
-            new_vec = index.clone()
+            neg_vec = genVectorBase(i, 2,nDim)
+            new_vec = list(index)
             for j in range(len(neg_vec)):
                 new_vec[j] -= neg_vec[j]
-            if min_value > DTW[new_vec]:
-                 min_value = DTW[new_vec]
+            if min_value > DTW[hashList(new_vec,len(seqs[0]))]:
+                #  print("min val dtw")
+                #  print(new_vec)
+                 min_value = DTW[hashList(new_vec,len(seqs[0]))]
                  min_path = new_vec
-        path[index] = min_path
-    return DTW, path
+        DTW[hashList(index,len(seqs[0]))] = min_value + dist
+        path[hashList(index,len(seqs[0]))] = min_path
+    return DTW,path
+
+def hashList(_list,_bValue):
+    sum=0
+    for idx,v in enumerate(_list):
+        sum+=v*(_bValue ** idx)
+    return sum
 
 def CalPath(path, next):
     if next[0] < 0 or next[1] < 0: return 
@@ -181,10 +196,24 @@ def CalPath(path, next):
     memPath = [next] + memPath
     CalPath(path, path[(next)])
 
+def CalNDimPath(path, next,_bValue):
+    # if next[0] < 0 or next[1] < 0 : return
+    print("next")
+    print(next)
+    for i in next:
+        if i < 0:
+            return
+    # print(next)
+    global memPath2
+    memPath2 = [next] + memPath2
+    print("hashList")
+    print(hashList(next,_bValue))
+    CalNDimPath(path, path[hashList(next,_bValue)],_bValue)
+
 def uniScaling(s1,to_len):
-    # print("uniscale")
-    # print(len(s1))
-    # print(to_len)
+    print("uniscale")
+    print(len(s1))
+    print(to_len)
     current_len = len(s1)
     ratio = current_len/to_len  
     result=[]
@@ -209,6 +238,16 @@ def getSeriefromPath(_memPath,_s1,_s2):
         new_serie.append((_s1[point[0]] + _s2[point[1]])/2)
     return new_serie
 
+def getSeriefromPathNDim(_memPath,series):
+    new_serie= []
+    for mapped_points in _memPath:
+        sum_value = 0
+        for idx,point in enumerate(mapped_points):
+            sum_value += series[idx][point]
+        new_serie.append(sum_value / len(series))
+        #new_serie.append((_s1[point[0]] + _s2[point[1]])*0.5)
+    return new_serie
+
 def average_ts(_s1, _s2):
     _s2 = uniScaling(_s2,len(_s1))
     costMap,path = DTWCostMatrix(_s1, _s2,window_size)
@@ -220,7 +259,21 @@ def average_ts(_s1, _s2):
     avgSerie = uniScaling(unScaledSeries,len(_s1))
     return avgSerie
 
-
+def average_n_ts(series):
+    for i in range(1, len(series)):
+        series[i] = uniScaling(series[i],len(series[0]))
+    costMap,path = DTWCostNDimMatrix(series)
+    global memPath2
+    memPath2=[]
+  
+    last_index = genVectorBase((len(series[0]) ** len(series)) - 1, len(series[0]),len(series) )
+    
+    CalNDimPath(path,last_index,len(series[0]))
+   
+    unScaledSeries = getSeriefromPathNDim(memPath2, series)
+    print("before Uniscaling {}".format(len(unScaledSeries)))
+    avgSerie = uniScaling(unScaledSeries, len(series[0]))
+    return avgSerie
 #
 # x,path = DTWCostMatrix(class_a[0],class_a[1],10)
 
@@ -242,6 +295,7 @@ def average_ts(_s1, _s2):
 # # plt.plot(MatrixP)
 # plt.show()
 memPath=[]
+memPath2=[]
 # CalPath(path, path[(469,469)])
 # new_serie= []
 # for point in memPath:
@@ -249,7 +303,7 @@ memPath=[]
 # print(len(new_serie))
 # plt.plot(new_serie)
 # plt.show()
-print(genVectorBase(14237,100))
+# print(genVectorBase(14237,100))
 # print('Hello')
 # scaled = uniScaling(new_serie,400)
 # plt.plot(scaled)
