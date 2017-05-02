@@ -238,6 +238,12 @@ def getSeriefromPath(_memPath,_s1,_s2):
         new_serie.append((_s1[point[0]] + _s2[point[1]])/2)
     return new_serie
 
+def getSeriefromPathWithWeight(_memPath,_s1,_s2,_w1,_w2):
+    new_serie= []
+    for point in _memPath:
+        new_serie.append((_w1 * _s1[point[0]] + _w2 * _s2[point[1]])/(_w1 + _w2))
+    return new_serie
+
 def getSeriefromPathNDim(_memPath,series):
     new_serie= []
     for mapped_points in _memPath:
@@ -256,6 +262,17 @@ def average_ts(_s1, _s2):
     memPath=[]
     CalPath(path,(len(_s1)-1,len(_s1)-1))
     unScaledSeries = getSeriefromPath(memPath,_s1,_s2)
+    avgSerie = uniScaling(unScaledSeries,len(_s1))
+    return avgSerie
+
+def average_ts_weight(_s1, _s2,w1,w2):
+    _s2 = uniScaling(_s2,len(_s1))
+    costMap,path = DTWCostMatrix(_s1, _s2,window_size)
+    costMatrix = toMatrix(costMap,len(_s1))
+    global memPath
+    memPath=[]
+    CalPath(path,(len(_s1)-1,len(_s1)-1))
+    unScaledSeries = getSeriefromPathWithWeight(memPath,_s1,_s2,w1,w2)
     avgSerie = uniScaling(unScaledSeries,len(_s1))
     return avgSerie
 
