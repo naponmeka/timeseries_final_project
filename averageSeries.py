@@ -124,11 +124,11 @@ def DTWCostMatrix(s1, s2, w):
     for i in range(len(s1)):
         for j in range(max(0, i-w), min(len(s2), i+w)):
             dist = (s1[i]-s2[j])**2
-            minVar = min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
-            DTW[(i, j)] = dist + minVar
-            if minVar == DTW[(i-1, j-1)]: path[(i,j)] = (i-1,j-1)
-            elif minVar == DTW[(i-1, j)]: path[(i,j)] = (i-1,j)
-            elif minVar == DTW[(i, j-1)]: path[(i,j)] = (i,j-1)
+            minVar = min(DTW[(i-1, j)] + 1*dist,DTW[(i, j-1)] + 1*dist, DTW[(i-1, j-1)]+1.5*dist)
+            DTW[(i, j)] = minVar
+            if minVar == DTW[(i-1, j-1)]+1.5*dist: path[(i,j)] = (i-1,j-1)
+            elif minVar == DTW[(i-1, j)]+dist: path[(i,j)] = (i-1,j)
+            elif minVar == DTW[(i, j-1)]+dist: path[(i,j)] = (i,j-1)
             
 
     # return sqrt(DTW[len(s1)-1, len(s2)-1])
@@ -172,12 +172,14 @@ def DTWCostNDimMatrix(seqs):
         for i in range(1, 2 ** nDim):
             neg_vec = genVectorBase(i, 2,nDim)
             new_vec = list(index)
+            weight_fn = 0
             for j in range(len(neg_vec)):
                 new_vec[j] -= neg_vec[j]
-            if min_value > DTW[hashList(new_vec,len(seqs[0]))]:
+                weight_fn += neg_vec[j]
+            if min_value > weight_fn * DTW[hashList(new_vec,len(seqs[0]))]:
                 #  print("min val dtw")
                 #  print(new_vec)
-                 min_value = DTW[hashList(new_vec,len(seqs[0]))]
+                 min_value = weight_fn * DTW[hashList(new_vec,len(seqs[0]))]
                  min_path = new_vec
         DTW[hashList(index,len(seqs[0]))] = min_value + dist
         path[hashList(index,len(seqs[0]))] = min_path

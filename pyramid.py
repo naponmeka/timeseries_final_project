@@ -67,18 +67,28 @@ for d in data_train:
         class_a.append(d[1:])
         # plt.plot(d[1:])
         counting += 1
-
+size = 50
 first = class_a[1]
+first = uniScaling(first , size)
 second = class_a[2]
-result = average_ts(first,second)
-result = average_ts(result,second)
-result2 = average_n_ts([first,second,second])
+second = uniScaling(second , size)
+third = class_a[3]
+third = uniScaling(third,size)
+# result = average_ts(first,second)
+# result = average_ts(result,second)
+# result2 = average_n_ts([first,second,third])
 
+# result = pyramid(class_a)
+result = pisa([first,first,second],50)
+
+# print(result)
+plt.plot(average_ts(first,second), 'purple')
 plt.plot(first)
 plt.plot(second)
+# plt.plot(third)
 
-plt.plot(result2,'blue')
-plt.plot(result,'red')
+# plt.plot(result2,'red')
+plt.plot(result[2],'black')
 plt.show()
 sys.exit(0)
 
