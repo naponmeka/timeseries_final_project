@@ -17,9 +17,9 @@ data_train_by_class = {}
 for idx,line in enumerate(f):
     floats = [float(x) for x in line.strip().split()]
     if floats[0] in data_train_by_class:
-        data_train_by_class[floats[0]].append(floats[1:50])
+        data_train_by_class[floats[0]].append(uniScaling(floats[1:],100))
     else:
-        data_train_by_class[floats[0]] = [floats[1:50]]
+        data_train_by_class[floats[0]] = [uniScaling(floats[1:],100)]
     # queue_train.append([idx]+floats)
     # data_train.append(floats)
 f.close()
@@ -60,30 +60,40 @@ graphs_to_plot = []
 for key_classname, value in data_train_by_class.items():
     print("DOING CLASS: {}".format(key_classname))
     cluster_of_three = find_closest_three(value)
+
+    weights = []
+    for group in cluster_of_three:
+        weight=[]
+        for one in group:
+            weight.append(1)
+        weights.append(weight)
+    # print(cluster_of_three)
+    # print(weights)
+    # sys.exit(0)
     results = []
+    weight_results = []
     while True:
         if len(cluster_of_three) == 1:break
         print('start while')
         print(cluster_of_three)
-        for c in cluster_of_three:
-            weights = []
-            for i in range(len(c)):
-                weights.append(1)
-            result = average_n_ts(c,weights)
-            print('done avg')
+        counting = 0
+        for i,c in enumerate(cluster_of_three):
+            counting +=1
+            # weights = []
+            # for i in range(len(c)):
+            #     weights.append(1)
+            result = average_n_ts(c,weights[i])
+            new_weight = sum(weights[i])
+            weight_results.append(new_weight)
             results.append(result)
         print("LEN:{}".format(len(results)))
-        
-        cluster_of_three = [results]
-        # print(cluster_of_three)
+        weights = [weight_results]
+        # print(weights)
         # sys.exit(0)
-        
-    # print('end while')
-    # print(cluster_of_three)
+        cluster_of_three = [results]
+
     graphs_to_plot.append(cluster_of_three[0][0])
-    # plt.plot(cluster_of_three[0][0])
-    # plt.show()
-    # sys.exit(0)
+
 
 for avg_result in graphs_to_plot:
     plt.figure()
