@@ -2,6 +2,7 @@ from math import *
 # from scipy.optimize import basinhopping
 import sys
 import time
+import statistics
 # import matplotlib.pyplot as plt
 
 def normalizeSeries(seq):
