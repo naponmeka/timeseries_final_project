@@ -179,6 +179,7 @@ def DTWCostNDimMatrix(seqs):
                 dist += (seqs[i][index[i]] - seqs[j][index[j]]) ** 2
         min_value = float('inf')
         min_path = [0]*nDim
+        min_weigh_fn = 0
         for i in range(1, 2 ** nDim):
             neg_vec = genVectorBase(i, 2,nDim)
             new_vec = list(index)
@@ -186,12 +187,14 @@ def DTWCostNDimMatrix(seqs):
             for j in range(len(neg_vec)):
                 new_vec[j] -= neg_vec[j]
                 weight_fn += neg_vec[j]
-            if min_value > weight_fn * DTW[hashList(new_vec,len(seqs[0]))]:
-                #  print("min val dtw")
-                #  print(new_vec)
-                 min_value = weight_fn * DTW[hashList(new_vec,len(seqs[0]))]
+            if min_value > dist * weight_fn + DTW[hashList(new_vec,len(seqs[0]))]:
+                 min_value = dist * weight_fn + DTW[hashList(new_vec,len(seqs[0]))]
                  min_path = new_vec
-        DTW[hashList(index,len(seqs[0]))] = min_value + dist
+                 min_weigh_fn = weight_fn
+            if min_value == dist * weight_fn + DTW[hashList(new_vec,len(seqs[0]))] and min_weigh_fn < weight_fn:
+                min_weigh_fn = weight_fn
+                min_path = new_vec
+        DTW[hashList(index,len(seqs[0]))] = min_value
         path[hashList(index,len(seqs[0]))] = min_path
     return DTW,path
 
@@ -342,3 +345,44 @@ memPath2=[]
 # scaled = uniScaling(new_serie,400)
 # plt.plot(scaled)
 # plt.show();
+print(average_n_ts([[0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,],[0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,]],[1,1]))
