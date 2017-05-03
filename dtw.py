@@ -114,7 +114,7 @@ maxV = []
 def func3d(x):
     global maxAcc,maxV
     start = time.time()
-    correct_predictions = Parallel(4)(delayed(process)(idx,d_test,x) for idx,d_test in enumerate(data_test) )
+    correct_predictions = Parallel(8)(delayed(process)(idx,d_test,x) for idx,d_test in enumerate(data_test) )
     cc =0
     for i in correct_predictions:
         cc+=i
