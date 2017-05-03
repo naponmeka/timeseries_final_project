@@ -15,19 +15,20 @@ train_lower_b = []
 train_upper_b = []
 window_size = 10
 r = 5
+data_train_dict = {}
 
 for line in f:
     floats = [float(x) for x in line.strip().split(' ')]
-    data_train.append(floats)
-    train_upper_b.append(upper_keogh(floats[1:]))
-    train_lower_b.append(lower_keogh(floats[1:]))
-f.close()
+    ts = floats[1:]
+    ts = normalizeSeries(ts)
 
-data_test = []
-f = open('ClassificationClusteringDatasets/' + test_filename)
-for line in f:
-    floats = [float(x) for x in line.strip().split(' ')]
-    data_test.append(floats)
+    if floats[0] in data_train_dict:
+        data_train_dict[floats[0]].append(ts)
+    else:
+        data_train_dict[floats[0]] = [ts]
+    # data_train.append(floats)
+    train_upper_b.append(upper_keogh(ts))
+    train_lower_b.append(lower_keogh(ts))
 f.close()
 
 def dba(D, I):
@@ -60,8 +61,6 @@ def dba_update(T, D):
 def dtw_multiple_alignment(s_ref, s):
     # STEP 1 : Compute the accumulated cost matrix of DTW
     cost, path =  DTWCostMatrix(s_ref, s, 20)
-    # print(cost)
-    # sys.exit(0)
     # STEP 2 : Store element associate to s_ref
     L = len(s_ref)
     alignment = [set() for _ in range(L)]
@@ -81,18 +80,13 @@ def dtw_multiple_alignment(s_ref, s):
             else: j = j -1
     return alignment
 
-class_a = []
-counting = 0
-first_label = data_train[0][0]
-for d in data_train:
-    if first_label == d[0]:
-        class_a.append(d[1:])
-        # plt.plot(d[1:])
-        counting += 1
-# print(class_a)
-# plt.show()
-mean = dba(class_a, 10)
-distance = avgMeanErrorEuclideanDistance(mean, class_a)
-print("AVD DISTANCE: {}".format(distance))
-plt.plot(mean)
-plt.show()
+meanDistances = []
+for key, one_class_data in data_train_dict.items():
+    mean = dba(one_class_data, 10)
+    distance = avgMeanErrorEuclideanDistance(mean, one_class_data)
+    meanDistances.append(distance)
+
+print("MEAN DIS")
+print(meanDistances)
+print("AVG MEAN DIS")
+print(statistics.mean(meanDistances))
