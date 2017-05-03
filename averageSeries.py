@@ -8,9 +8,11 @@ import statistics
 def normalizeSeries(seq):
     sd = statistics.stdev(seq)
     mean = statistics.mean(seq)
+    new_seq = []
     for a in seq:
         a = (a - mean)/sd
-    return seq
+        new_seq.append(a)
+    return new_seq
 
 def upper_keogh(seq):
     upper_seq = []
