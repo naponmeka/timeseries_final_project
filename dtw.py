@@ -33,8 +33,8 @@ def lower_keogh(seq):
     return lower_seq
 
 start = time.time()
-train_filename = 'Beef_TRAIN'
-test_filename = 'Beef_TEST'
+train_filename = 'Coffee_TRAIN'
+test_filename = 'Coffee_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
 train_lower_b = []
@@ -153,7 +153,7 @@ def process(idx,d_test,x):
 
 # x0 = [0.6, 0.1, 2.26]
 # x0 = [2.688,3.447,3.399]
-x0 = [1,0,1]
+x0 = [1,1,1]
 # the bounds
 xmin = [0., 0., 0.]
 xmax = [15., 15., 15.]
