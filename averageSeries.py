@@ -4,6 +4,13 @@ import sys
 import time
 # import matplotlib.pyplot as plt
 
+def normalizeSeries(seq):
+    sd = statistics.stdev(seq)
+    mean = statistics.mean(seq)
+    for a in seq:
+        a = (a - mean)/sd
+    return seq
+
 def upper_keogh(seq):
     upper_seq = []
     for i in range(len(seq)):
