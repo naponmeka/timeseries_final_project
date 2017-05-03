@@ -1,7 +1,10 @@
 from math import *
 from scipy.optimize import basinhopping
+from joblib import Parallel, delayed
+import multiprocessing
 import sys
 import time
+from averageSeries import *
 
 def upper_keogh(seq):
     upper_seq = []
@@ -41,6 +44,7 @@ r = 5
 
 for line in f:
     floats = [float(x) for x in line.strip().split()]
+    # floats[1:] = uniScaling(floats[1:],50)
     data_train.append(floats)
     train_upper_b.append(upper_keogh(floats[1:]))
     train_lower_b.append(lower_keogh(floats[1:]))
@@ -50,6 +54,8 @@ data_test = []
 f = open('ClassificationClusteringDatasets/' + test_filename)
 for line in f:
     floats = [float(x) for x in line.strip().split()]
+    # print(len(floats))
+    # floats[1:] = uniScaling(floats[1:],50)
     data_test.append(floats)
 f.close()
 
@@ -102,37 +108,60 @@ for idx,d_test in enumerate(data_test):
     print("index:{}, time:{}".format(idx, end - start))
 print(correct_predictions/len(data_test))
 '''
+maxAcc = 0
+maxV = []
 def func3d(x):
+    global maxAcc,maxV
+    start = time.time()
+    correct_predictions = Parallel(4)(delayed(process)(idx,d_test,x) for idx,d_test in enumerate(data_test) )
+    cc =0
+    for i in correct_predictions:
+        cc+=i
+    print(-1*cc/len(data_test))
+    if -1*cc/len(data_test) < maxAcc : 
+        maxAcc = -1*cc/len(data_test) 
+        maxV = x
+    end = time.time()
+    print("function taketime :{}".format(start-end))
+    print(x)
+    print("max Acc : ",maxAcc)
+    print("maxV")
+    print(maxV)
+    return -1*cc/len(data_test)
+    
+def process(idx,d_test,x):
     correct_predictions = 0
-    for idx,d_test in enumerate(data_test):
-        min_dist = float('inf')
-        the_label = 0
-        for idx2, d_train in enumerate(data_train):
-            LB_dist = LB_Keogh(d_test[1:], idx2)
-            if LB_dist < min_dist:
-                distance = DTWDistance(d_test[1:],d_train[1:],window_size,x[0],x[1],x[2])
-                if distance < min_dist:
-                    min_dist = distance
-                    the_label = d_train[0]
-        if the_label == d_test[0]:
-            correct_predictions += 1
-        end = time.time()
+    min_dist = float('inf')
+    the_label = 0
+    for idx2, d_train in enumerate(data_train):
+        LB_dist = LB_Keogh(d_test[1:], idx2)
+        if LB_dist < min_dist:
+            distance = DTWDistance(d_test[1:],d_train[1:],window_size,x[0],x[1],x[2])
+            if distance < min_dist:
+                min_dist = distance
+                the_label = d_train[0]
+    if the_label == d_test[0]:
+        correct_predictions += 1
+    end = time.time()
         # print("index:{}, time:{}".format(idx, end - start))
     # print(correct_predictions/len(data_test))
-    return -1*correct_predictions/len(data_test)
+    return correct_predictions
+    
 
 
 
-x0 = [1.0, 1.0, 1.0]
+# x0 = [0.6, 0.1, 2.26]
+# x0 = [2.688,3.447,3.399]
+x0 = [1,0,1]
 # the bounds
 xmin = [0., 0., 0.]
-xmax = [3., 3., 3.]
+xmax = [15., 15., 15.]
 
 # rewrite the bounds in the way required by L-BFGS-B
 bounds = [(low, high) for low, high in zip(xmin, xmax)]
 minimizer_kwargs = {"method": "L-BFGS-B", "bounds":bounds}
 print('start basinhopping')
-ret = basinhopping(func3d, x0, minimizer_kwargs=minimizer_kwargs, niter=100)
+ret = basinhopping(func3d, x0, minimizer_kwargs=minimizer_kwargs, niter=10000)
 print("global minimum: x = [%.4f, %.4f, %.4f], f(x0) = %.4f" % (ret.x[0],ret.x[1],ret.x[2],ret.fun))
 print('done')
 end = time.time()
