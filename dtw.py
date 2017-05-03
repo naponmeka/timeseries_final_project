@@ -33,8 +33,8 @@ def lower_keogh(seq):
     return lower_seq
 
 start = time.time()
-train_filename = 'Beef_TRAIN'
-test_filename = 'Beef_TEST'
+train_filename = 'Coffee_TRAIN'
+test_filename = 'Coffee_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
 train_lower_b = []
@@ -45,7 +45,7 @@ r = 5
 for line in f:
     floats = [float(x) for x in line.strip().split()]
     # floats[1:] = uniScaling(floats[1:],50)
-    data_train.append(floats)
+    data_train.append( normalizeSeries(floats[1:]) )
     train_upper_b.append(upper_keogh(floats[1:]))
     train_lower_b.append(lower_keogh(floats[1:]))
 f.close()
@@ -56,6 +56,7 @@ for line in f:
     floats = [float(x) for x in line.strip().split()]
     # print(len(floats))
     # floats[1:] = uniScaling(floats[1:],50)
+    floats[1:] = normalizeSeries(floats[1:])
     data_test.append(floats)
 f.close()
 
@@ -113,7 +114,7 @@ maxV = []
 def func3d(x):
     global maxAcc,maxV
     start = time.time()
-    correct_predictions = Parallel(4)(delayed(process)(idx,d_test,x) for idx,d_test in enumerate(data_test) )
+    correct_predictions = Parallel(8)(delayed(process)(idx,d_test,x) for idx,d_test in enumerate(data_test) )
     cc =0
     for i in correct_predictions:
         cc+=i
@@ -152,7 +153,7 @@ def process(idx,d_test,x):
 
 # x0 = [0.6, 0.1, 2.26]
 # x0 = [2.688,3.447,3.399]
-x0 = [1,0,1]
+x0 = [1,1,1]
 # the bounds
 xmin = [0., 0., 0.]
 xmax = [15., 15., 15.]
