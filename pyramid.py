@@ -76,19 +76,19 @@ third = class_a[3]
 third = uniScaling(third,size)
 # result = average_ts(first,second)
 # result = average_ts(result,second)
-# result2 = average_n_ts([first,second,third])
+result2 = average_n_ts([first,second,third],[1,0,0])
 
 # result = pyramid(class_a)
-result = pisa([first,first,second],50)
+# result = pisa([first,first,second],50)
 
 # print(result)
-plt.plot(average_ts(first,second), 'purple')
+# plt.plot(average_ts(first,second), 'purple')
 plt.plot(first)
 plt.plot(second)
-# plt.plot(third)
+plt.plot(third)
 
 # plt.plot(result2,'red')
-plt.plot(result[2],'black')
+plt.plot(result2,'black')
 plt.show()
 sys.exit(0)
 
