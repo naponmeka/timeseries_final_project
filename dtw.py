@@ -46,8 +46,8 @@ for line in f:
     floats = [float(x) for x in line.strip().split()]
     # floats[1:] = uniScaling(floats[1:],50)
     data_train.append( normalizeSeries(floats[1:]) )
-    train_upper_b.append(upper_keogh(floats[1:]))
-    train_lower_b.append(lower_keogh(floats[1:]))
+    train_upper_b.append(upper_keogh(normalizeSeries(floats[1:])))
+    train_lower_b.append(lower_keogh(normalizeSeries(floats[1:])))
 f.close()
 
 data_test = []
