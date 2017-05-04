@@ -32,11 +32,11 @@ def avgMeanErrorEuclideanDistance(mean_seq, list_of_sequence):
     sum_distance = 0
     distances = []
     for seq in list_of_sequence:
-        distances.append(euclideanDistance(mean_seq, seq))
-        sum_distance += euclideanDistance(mean_seq, seq)
+        distance = (DTWDistance(mean_seq, seq, 1000))**2
+        distances.append(distance)
+        sum_distance += distance
     print("-----ANOVA-----")
     print(distances)
     print("MEAN: {}".format(statistics.mean(distances)))
     print("SD: {}".format(statistics.stdev(distances)))
     return sum_distance/len(list_of_sequence)
-# print(avgMeanErrorDistance(the_mean_seq,test_list))
