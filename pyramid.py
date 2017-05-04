@@ -4,10 +4,11 @@ from scipy.optimize import basinhopping
 import sys
 import time
 import matplotlib.pyplot as plt
+from computeAccuracy import *
 
-
+sys.setrecursionlimit(1500)
 start = time.time()
-train_filename = 'Beef_TRAIN'
+train_filename = 'OliveOil_ALL'
 test_filename = 'Beef_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
@@ -15,20 +16,26 @@ train_lower_b = []
 train_upper_b = []
 window_size = 10
 r = 5
-
+data_train_dict = {}
 for line in f:
-    floats = [float(x) for x in line.strip().split(' ')]
-    data_train.append(floats)
-    train_upper_b.append(upper_keogh(floats[1:]))
-    train_lower_b.append(lower_keogh(floats[1:]))
+    floats = [float(x) for x in line.strip().split()]
+    ts = floats[1:]
+    ts = normalizeSeries(ts)
+    if floats[0] in data_train_dict:
+        data_train_dict[floats[0]].append(ts)
+    else:
+        data_train_dict[floats[0]] = [ts]
+    # data_train.append(floats)
+    train_upper_b.append(upper_keogh(ts))
+    train_lower_b.append(lower_keogh(ts))
 f.close()
 
-data_test = []
-f = open('ClassificationClusteringDatasets/' + test_filename)
-for line in f:
-    floats = [float(x) for x in line.strip().split(' ')]
-    data_test.append(floats)
-f.close()
+# data_test = []
+# f = open('ClassificationClusteringDatasets/' + test_filename)
+# for line in f:
+#     floats = [float(x) for x in line.strip().split(' ')]
+#     data_test.append(floats)
+# f.close()
 
 def pyramid(serie):
     out=[]
@@ -37,7 +44,7 @@ def pyramid(serie):
         else : out.append(average_ts(value,serie[idx+1]))
     if len(out)==1: return out
     else :
-        print(len(out)) 
+        print(len(out))
         return pyramid(out)
 
 def pisa(serie,iteration):
@@ -57,7 +64,25 @@ def pisa(serie,iteration):
 
         return pisa(list(out),iteration)
 
+meanDistances = []
+weights_to_mean = []
+for key, one_class_data in data_train_dict.items():
+    mean = pyramid(one_class_data)[0]
+    distance = avgMeanErrorEuclideanDistance(mean, one_class_data)
+    meanDistances.append(distance)
+    weights_to_mean.append(len(one_class_data))
 
+the_mean = 0
+sum_weight = 0
+for idx,m in enumerate(meanDistances):
+    the_mean += m * weights_to_mean[idx]
+    sum_weight += weights_to_mean[idx]
+the_mean = the_mean/sum_weight
+print(the_mean)
+
+
+sys.exit(0)
+##########
 
 class_a = []
 counting = 0
