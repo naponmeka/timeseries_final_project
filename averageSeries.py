@@ -198,7 +198,7 @@ def DTWCostNDimMatrix(seqs):
         path[hashList(index,len(seqs[0]))] = min_path
     return DTW,path
 
-band_radius = 15
+band_radius = 10
 def DTWCostNDimMatrixWithBand(seqs):
     nDim = len(seqs)
     DTW = {}
@@ -271,30 +271,22 @@ def CalPath(path, next):
 
 def CalNDimPath(path, next,_bValue):
     # if next[0] < 0 or next[1] < 0 : return
-    print("next")
-    print(next)
     for i in next:
         if i < 0:
             return
     # print(next)
     global memPath2
     memPath2 = [next] + memPath2
-    print("hashList")
-    print(hashList(next,_bValue))
     CalNDimPath(path, path[hashList(next,_bValue)],_bValue)
 
 def CalNDimPathBand(path, next,_bValue):
     # if next[0] < 0 or next[1] < 0 : return
-    print("next")
-    print(next)
     for i in next:
         if i < 1:
             return
     # print(next)
     global memPath2
     memPath2 = [next] + memPath2
-    print("hashList")
-    print(hashList(next,_bValue))
     CalNDimPathBand(path, path[hashList(next,_bValue)],_bValue)
 
 
@@ -523,4 +515,25 @@ print(average_n_ts_band([[0,0,0,0,0,30,50,90,50,30,
 0,0,0,0,0,30,50,90,50,30,
 0,0,0,0,0,30,50,90,50,30,
 0,0,0,0,0,30,50,90,50,30,
-0,0,0,0,0,30,50,90,50,30,]],[1,1,1]))
+0,0,0,0,0,30,50,90,50,30,],
+[0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,]],[1,1,1,1]))
