@@ -3,7 +3,7 @@ import sys
 from collections import deque
 import matplotlib.pyplot as plt
 from computeAccuracy import *
-train_filename = 'Beef_ALL'
+train_filename = 'Trace_ALL'
 test_filename = 'Beef_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
@@ -17,10 +17,13 @@ data_train_by_class = {}
 
 for idx,line in enumerate(f):
     floats = [float(x) for x in line.strip().split()]
+    ts = floats[1:]
+    ts = normalizeSeries(ts)
+    ts = uniScaling(ts,70)
     if floats[0] in data_train_by_class:
-        data_train_by_class[floats[0]].append(uniScaling(floats[1:],70))
+        data_train_by_class[floats[0]].append(ts)
     else:
-        data_train_by_class[floats[0]] = [uniScaling(floats[1:],70)]
+        data_train_by_class[floats[0]] = [ts]
 f.close()
 
 def find_closest_three(arr_of_seq):
@@ -38,7 +41,7 @@ def find_closest_three(arr_of_seq):
         usedIndex.append(idx)
         for idx2, value2 in enumerate(arr_of_seq):
             if idx2 in usedIndex: continue
-            distance = DTWDistance(value['serie'], value2['serie'],30)
+            distance = DTWDistance(value['serie'], value2['serie'],1000)
             distance_and_index.append((distance,idx2))
         distance_and_index = sorted(distance_and_index)
         for idx3, p in enumerate(distance_and_index):
@@ -71,14 +74,16 @@ for key_classname, one_class_data in data_train_by_class.items():
     #     for one in group:
     #         weight.append(1)
     #     weights.append(weight)
-    results = []
+    
     
     while True:
+        print("WHILE LEN: {}".format(len(cluster_of_three)))
         if len(cluster_of_three) == 1:break
         print('start while')
         print(cluster_of_three)
         counting = 0
         # weight_results = []
+        results = []
         for i,c in enumerate(cluster_of_three):
             counting +=1
             result = average_n_ts_band_tuple(c)
@@ -90,9 +95,13 @@ for key_classname, one_class_data in data_train_by_class.items():
         # weights
         cluster_of_three = find_closest_three(results)
         #group weight item 
-
+    
+    # print("END WHILE")
+    # sys.exit()
     the_mean_seq = cluster_of_three[0][0]
-    distance = avgMeanErrorEuclideanDistance(the_mean_seq, one_class_data)
+    # print(the_mean_seq)
+    # sys.exit(0)
+    distance = avgMeanErrorEuclideanDistanceTuple(the_mean_seq, one_class_data)
     meanDistances.append(distance)
     weights_to_mean.append(len(one_class_data))
     graphs_to_plot.append(the_mean_seq)
