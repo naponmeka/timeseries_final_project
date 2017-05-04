@@ -6,11 +6,11 @@ import statistics
 # import matplotlib.pyplot as plt
 
 def normalizeSeries(seq):
-    sd = statistics.stdev(seq)
-    mean = statistics.mean(seq)
+    minn = min(seq)
+    maxx = max(seq)
     new_seq = []
     for a in seq:
-        a = (a - mean)/sd
+        a = (a - minn) /(maxx - minn)
         new_seq.append(a)
     return new_seq
 
