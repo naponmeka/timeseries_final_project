@@ -407,6 +407,19 @@ def average_n_ts_band(series, weights):
     print("before Uniscaling {}".format(len(unScaledSeries)))
     avgSerie = uniScaling(unScaledSeries, len(series[0]))
     return avgSerie
+
+def average_n_ts_band_tuple(seriesWithWeight):
+    series = []
+    weights = []
+    for item in seriesWithWeight:
+        series.append(item['serie'])
+        weights.append(item['weight'])
+    avgSerie = average_n_ts_band(series, weights)
+    formatted_data = {
+        'serie': avgSerie,
+        'weight': sum(weights)
+    }
+    return formatted_data
 #
 # x,path = DTWCostMatrix(class_a[0],class_a[1],10)
 
