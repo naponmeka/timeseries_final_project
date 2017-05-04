@@ -251,7 +251,11 @@ if True:
             x2 += 1
         x0 += 1
         x2 = 0
-    fo.close()
+    # fo.close()
+    # print("t")
+    # print(t)
+    # print("u")
+    # print(u)
 
 if False:
     x0 = 0
@@ -270,18 +274,36 @@ if False:
         x1 = 0
     fo.close()
 
+
+
 T = np.array(t)
 U = np.array(u)
 T,U = np.meshgrid(T,U)
+V = np.array(v)
 
-surf = ax.plot_surface(T, U, v, cmap=cm.coolwarm,linewidth=0, antialiased=False)
+ax.plot_trisurf(t, u, v, linewidth=0.2, antialiased=True)
 
-# Customize the z axis.
-ax.set_zlim(0,1)
-ax.zaxis.set_major_locator(LinearLocator(10))
-ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+# surf = ax.plot_surface(T, U, V, cmap=cm.coolwarm,linewidth=0, antialiased=False)
 
-# Add a color bar which maps values to colors.
-fig.colorbar(surf, shrink=0.5, aspect=5)
+# # Customize the z axis.
+# ax.set_zlim(0,1)
+# ax.zaxis.set_major_locator(LinearLocator(10))
+# ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+ax.set_xlabel('\n' + 'w1', linespacing=4)
+ax.set_ylabel('w3')
+ax.set_zlabel("accuracy")
+# # Add a color bar which maps values to colors.
+# # fig.colorbar(surf, shrink=0.5, aspect=5)
+# x2=1
+# x1=10
+# x0=0
+# result = []
+# t=[]
+# while x0 < 10:
+#     rtmp = func3d([x0,x1,x2])* -1
+#     t.append(x0)
+#     result.append(rtmp)
+#     x0+=1
 
+# plt.plot(t,result)
 plt.show()
