@@ -179,6 +179,7 @@ def DTWCostNDimMatrix(seqs):
                 dist += (seqs[i][index[i]] - seqs[j][index[j]]) ** 2
         min_value = float('inf')
         min_path = [0]*nDim
+        min_weigh_fn = 0
         for i in range(1, 2 ** nDim):
             neg_vec = genVectorBase(i, 2,nDim)
             new_vec = list(index)
@@ -186,13 +187,73 @@ def DTWCostNDimMatrix(seqs):
             for j in range(len(neg_vec)):
                 new_vec[j] -= neg_vec[j]
                 weight_fn += neg_vec[j]
-            if min_value > weight_fn * DTW[hashList(new_vec,len(seqs[0]))]:
-                #  print("min val dtw")
-                #  print(new_vec)
-                 min_value = weight_fn * DTW[hashList(new_vec,len(seqs[0]))]
+            if min_value > dist * weight_fn + DTW[hashList(new_vec,len(seqs[0]))]:
+                 min_value = dist * weight_fn + DTW[hashList(new_vec,len(seqs[0]))]
                  min_path = new_vec
-        DTW[hashList(index,len(seqs[0]))] = min_value + dist
+                 min_weigh_fn = weight_fn
+            if min_value == dist * weight_fn + DTW[hashList(new_vec,len(seqs[0]))] and min_weigh_fn < weight_fn:
+                min_weigh_fn = weight_fn
+                min_path = new_vec
+        DTW[hashList(index,len(seqs[0]))] = min_value
         path[hashList(index,len(seqs[0]))] = min_path
+    return DTW,path
+
+band_radius = 15
+def DTWCostNDimMatrixWithBand(seqs):
+    nDim = len(seqs)
+    DTW = {}
+    path = {}
+    for i in range((len(seqs[0])+1)):
+        for k in range(((band_radius + 1) * 2 + 1) ** (nDim - 1)):
+            n_vec = genVectorBase(k, (band_radius + 1) * 2 + 1, nDim - 1)
+            isInRange = True
+            for j in range(len(n_vec)):
+                n_vec[j] -= (band_radius+1)
+                n_vec[j] += i
+                if n_vec[j] < 0 or n_vec[j] > len(seqs[0]): 
+                    isInRange = False
+                    break
+            if isInRange:
+                n_vec.append(i)
+                DTW[hashList(n_vec, len(seqs[0])+1)] = float('inf')
+    DTW[0] = 0
+    for main_step in range(1,(len(seqs[0])+1)):
+        for k in range((band_radius * 2 + 1) ** (nDim - 1)):
+            n_vec = genVectorBase(k, (band_radius) * 2 + 1, nDim - 1)
+            isInRange = True
+            for j in range(len(n_vec)):
+                n_vec[j] -= (band_radius)
+                n_vec[j] += main_step
+                if n_vec[j] < 1 or n_vec[j] > len(seqs[0]): 
+                    isInRange = False
+                    break
+            if isInRange:
+                n_vec.append(main_step)
+                index = n_vec
+                # print(n_vec)
+                dist = 0
+                for i in range(nDim):
+                    for j in range(i+1,nDim):
+                        dist += (seqs[i][index[i] - 1] - seqs[j][index[j] - 1]) ** 2
+                min_value = float('inf')
+                min_path = [0]*nDim
+                min_weigh_fn = 0
+                for i in range(1, 2 ** nDim):
+                    neg_vec = genVectorBase(i, 2,nDim)
+                    new_vec = list(index)
+                    weight_fn = 0
+                    for j in range(len(neg_vec)):
+                        new_vec[j] -= neg_vec[j]
+                        weight_fn += neg_vec[j]
+                    if min_value > dist * weight_fn + DTW[hashList(new_vec,len(seqs[0])+1)]:
+                        min_value = dist * weight_fn + DTW[hashList(new_vec,len(seqs[0])+1)]
+                        min_path = new_vec
+                    if min_value == dist * weight_fn + DTW[hashList(new_vec,len(seqs[0])+1)] and min_weigh_fn < weight_fn:
+                        min_weigh_fn = weight_fn
+                        min_path = new_vec
+                DTW[hashList(index,len(seqs[0])+1)] = min_value
+                path[hashList(index,len(seqs[0])+1)] = min_path
+    # print(path)
     return DTW,path
 
 def hashList(_list,_bValue):
@@ -221,6 +282,21 @@ def CalNDimPath(path, next,_bValue):
     print("hashList")
     print(hashList(next,_bValue))
     CalNDimPath(path, path[hashList(next,_bValue)],_bValue)
+
+def CalNDimPathBand(path, next,_bValue):
+    # if next[0] < 0 or next[1] < 0 : return
+    print("next")
+    print(next)
+    for i in next:
+        if i < 1:
+            return
+    # print(next)
+    global memPath2
+    memPath2 = [next] + memPath2
+    print("hashList")
+    print(hashList(next,_bValue))
+    CalNDimPathBand(path, path[hashList(next,_bValue)],_bValue)
+
 
 def uniScaling(s1,to_len):
     print("uniscale")
@@ -271,6 +347,21 @@ def getSeriefromPathNDim(_memPath,series,weights):
         #new_serie.append((_s1[point[0]] + _s2[point[1]])*0.5)
     return new_serie
 
+def getSeriefromPathNDimBand(_memPath,series,weights):
+    new_serie= []
+    sum_weight = 0
+    for i in weights:
+        sum_weight += i
+    print("sum weight:")
+    print(sum_weight)
+    for mapped_points in _memPath:
+        sum_value = 0
+        for idx,point in enumerate(mapped_points):
+            sum_value += series[idx][point - 1] * weights[idx]
+        new_serie.append(sum_value / sum_weight)
+        #new_serie.append((_s1[point[0]] + _s2[point[1]])*0.5)
+    return new_serie
+
 def average_ts(_s1, _s2):
     _s2 = uniScaling(_s2,len(_s1))
     costMap,path = DTWCostMatrix(_s1, _s2,window_size)
@@ -308,6 +399,22 @@ def average_n_ts(series, weights):
     print("before Uniscaling {}".format(len(unScaledSeries)))
     avgSerie = uniScaling(unScaledSeries, len(series[0]))
     return avgSerie
+
+def average_n_ts_band(series, weights):
+    for i in range(1, len(series)):
+        series[i] = uniScaling(series[i],len(series[0]))
+    costMap,path = DTWCostNDimMatrixWithBand(series)
+    global memPath2
+    memPath2=[]
+  
+    last_index = genVectorBase(((len(series[0])+1) ** len(series)) - 1, (len(series[0])+1),len(series) )
+
+    CalNDimPathBand(path,last_index,(len(series[0])+1))
+   
+    unScaledSeries = getSeriefromPathNDimBand(memPath2, series, weights)
+    print("before Uniscaling {}".format(len(unScaledSeries)))
+    avgSerie = uniScaling(unScaledSeries, len(series[0]))
+    return avgSerie
 #
 # x,path = DTWCostMatrix(class_a[0],class_a[1],10)
 
@@ -342,3 +449,65 @@ memPath2=[]
 # scaled = uniScaling(new_serie,400)
 # plt.plot(scaled)
 # plt.show();
+print(average_n_ts_band([[0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,],[0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,],
+[0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,
+0,0,0,0,0,30,50,90,50,30,]],[1,1,1]))
