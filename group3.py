@@ -1,8 +1,9 @@
 from averageSeries import *
 import sys
 from collections import deque
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from computeAccuracy import *
+
 train_filename = 'Trace_ALL'
 test_filename = 'Beef_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
@@ -15,6 +16,7 @@ queue_train = deque([])
 
 data_train_by_class = {}
 
+print("Hello")
 for idx,line in enumerate(f):
     floats = [float(x) for x in line.strip().split()]
     ts = floats[1:]
@@ -24,6 +26,7 @@ for idx,line in enumerate(f):
         data_train_by_class[floats[0]].append(ts)
     else:
         data_train_by_class[floats[0]] = [ts]
+
 f.close()
 
 def find_closest_three(arr_of_seq):
@@ -79,8 +82,7 @@ for key_classname, one_class_data in data_train_by_class.items():
     while True:
         print("WHILE LEN: {}".format(len(cluster_of_three)))
         if len(cluster_of_three) == 1:break
-        print('start while')
-        print(cluster_of_three)
+        print(len(cluster_of_three))
         counting = 0
         # weight_results = []
         results = []
@@ -90,14 +92,11 @@ for key_classname, one_class_data in data_train_by_class.items():
             # new_weight = sum(weights[i])
             # weight_results.append(new_weight)
             results.append(result)
-        print("LEN:{}".format(len(results)))
         # weights = weight_results
         # weights
         cluster_of_three = find_closest_three(results)
         #group weight item 
-    
-    # print("END WHILE")
-    # sys.exit()
+
     the_mean_seq = cluster_of_three[0][0]
     # print(the_mean_seq)
     # sys.exit(0)
