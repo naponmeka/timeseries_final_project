@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from computeAccuracy import *
 
 start = time.time()
-train_filename = 'Beef_TRAIN'
+train_filename = 'Trace_ALL'
 test_filename = 'Beef_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
@@ -18,7 +18,7 @@ r = 5
 data_train_dict = {}
 
 for line in f:
-    floats = [float(x) for x in line.strip().split(' ')]
+    floats = [float(x) for x in line.strip().split()]
     ts = floats[1:]
     ts = normalizeSeries(ts)
 
@@ -80,13 +80,23 @@ def dtw_multiple_alignment(s_ref, s):
             else: j = j -1
     return alignment
 
+the_mean = 0
+sum_weight = 0
 meanDistances = []
+weights_to_mean = []
 for key, one_class_data in data_train_dict.items():
     mean = dba(one_class_data, 10)
     distance = avgMeanErrorEuclideanDistance(mean, one_class_data)
     meanDistances.append(distance)
+    weights_to_mean.append(len(one_class_data))
 
 print("MEAN DIS")
 print(meanDistances)
 print("AVG MEAN DIS")
-print(statistics.mean(meanDistances))
+the_mean = 0
+sum_weight = 0
+for idx,m in enumerate(meanDistances):
+    the_mean += m * weights_to_mean[idx]
+    sum_weight += weights_to_mean[idx]
+the_mean = the_mean/sum_weight
+print(the_mean)

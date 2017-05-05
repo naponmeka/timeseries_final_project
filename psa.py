@@ -11,8 +11,8 @@ from sklearn.metrics import pairwise_distances
 import sys
 from computeAccuracy import *
 
-train_filename = 'Beef_TRAIN'
-test_filename = 'Beef_TEST'
+train_filename = 'Beef_ALL'
+test_filename = 'ECG200_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
 train_lower_b = []
@@ -24,6 +24,7 @@ lookupData = []
 data_train_dict = {}
 lookupData_dict = {}
 for idx,line in enumerate(f):
+    print(idx)
     floats = [float(x) for x in line.strip().split()]
     ts = floats[1:]
     ts = normalizeSeries(ts)
@@ -51,6 +52,7 @@ def psa_average(c, num_of_data, class_name):
         return [z, r1+r2]
 
 meanDistances = []
+weights_to_mean = []
 for key, one_class_data in data_train_dict.items():
     class_name = key
     number_of_data = len(one_class_data)
@@ -87,9 +89,17 @@ for key, one_class_data in data_train_dict.items():
     result = Z
     m = avgMeanErrorEuclideanDistance(result, lookupData_dict[class_name])
     meanDistances.append(m)
+    weights_to_mean.append(len(one_class_data))
 
 print("MEAN DIS")
 print(meanDistances)
 print("AVG MEAN DIS")
-print(statistics.mean(meanDistances))
+the_mean = 0
+sum_weight = 0
+for idx,m in enumerate(meanDistances):
+    the_mean += m * weights_to_mean[idx]
+    sum_weight += weights_to_mean[idx]
+the_mean = the_mean/sum_weight
+print(the_mean)
+# print(statistics.mean(meanDistances))
 # TODO: weighted mean

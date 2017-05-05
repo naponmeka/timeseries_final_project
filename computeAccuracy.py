@@ -40,3 +40,22 @@ def avgMeanErrorEuclideanDistance(mean_seq, list_of_sequence):
     print("MEAN: {}".format(statistics.mean(distances)))
     print("SD: {}".format(statistics.stdev(distances)))
     return sum_distance/len(list_of_sequence)
+
+def avgMeanErrorEuclideanDistanceTuple(mean_seq_tuple, list_of_sequence_tuple):
+    mean_seq = mean_seq_tuple['serie']
+    list_of_sequence = list_of_sequence_tuple
+    # for idx, item in list_of_sequence_tuple.items():
+    #     list_of_sequence.append(item['serie'])
+    
+    
+    sum_distance = 0
+    distances = []
+    for seq in list_of_sequence:
+        distance = (DTWDistance(mean_seq, seq, 1000))**2
+        distances.append(distance)
+        sum_distance += distance
+    print("-----ANOVA-----")
+    print(distances)
+    print("MEAN: {}".format(statistics.mean(distances)))
+    print("SD: {}".format(statistics.stdev(distances)))
+    return sum_distance/len(list_of_sequence)
