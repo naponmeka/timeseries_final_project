@@ -8,7 +8,7 @@ from computeAccuracy import *
 
 sys.setrecursionlimit(1500)
 start = time.time()
-train_filename = 'OliveOil_ALL'
+train_filename = 'Coffee_ALL'
 test_filename = 'Beef_TEST'
 f = open('ClassificationClusteringDatasets/' + train_filename)
 data_train = []
@@ -67,6 +67,7 @@ def pisa(serie,iteration):
 meanDistances = []
 weights_to_mean = []
 for key, one_class_data in data_train_dict.items():
+    one_class_data = pisa(one_class_data,10)
     mean = pyramid(one_class_data)[0]
     distance = avgMeanErrorEuclideanDistance(mean, one_class_data)
     meanDistances.append(distance)
